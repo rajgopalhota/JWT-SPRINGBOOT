@@ -132,3 +132,97 @@ The `/protected-route` endpoint requires a valid JWT token to access. If the tok
 This project provides a simple implementation of JWT-based authentication in a Spring Boot application. The key components include a custom JWT authentication filter, security configuration, and the ability to access protected routes with a valid token. This architecture can be easily extended to handle additional security features such as role-based access control and token refresh mechanisms.
 
 ---
+
+
+## Day 2: Enhancements and API Design
+
+### Enhancements Made
+
+1. **Enhanced JWT Payload**:
+    - Added `accountNumber` field along with the username in the JWT payload.
+
+2. **Additional Routes**:
+    - Designed multiple routes supporting different request types: GET (with query parameters), POST (with a request body), and PUT (with path variables).
+
+3. **Unified User Data Access**:
+    - Each route now extracts and returns the authenticated username, account number, and route-specific data.
+
+### Updated JWT Utility Methods
+
+| Method              | Description                                                 |
+|---------------------|-------------------------------------------------------------|
+| `generateToken()`   | Generates a token containing both `username` and `accountNumber`. |
+| `extractUsername()` | Extracts the `username` from the token.                     |
+| `extractAccountNum()` | Extracts the `accountNumber` from the token.               |
+
+### Controller Methods
+
+| HTTP Method | Endpoint                 | Request Type        | Parameters              | Description                                                |
+|-------------|--------------------------|---------------------|-------------------------|------------------------------------------------------------|
+| GET         | `/api/get-with-params`  | Query Parameters    | `param1`, `param2`      | Returns username, accountNumber, and provided query params.|
+| POST        | `/api/post-with-body`   | JSON Request Body   | `key`, `value`          | Returns username, accountNumber, and body content.         |
+| PUT         | `/api/put-with-path/{id}` | Path Variable + Body | `id`, `updateField`    | Returns username, accountNumber, and updated content.      |
+
+### Example Controller Implementation
+
+```java
+@RestController
+@RequestMapping("/api")
+public class ApiController {
+
+    private final JwtUtil jwtUtil;
+
+    public ApiController(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
+
+    @GetMapping("/get-with-params")
+    public ResponseEntity<?> getWithParams(@RequestParam String param1, @RequestParam String param2, @RequestHeader("Authorization") String token) {
+        String username = jwtUtil.extractUsername(token);
+        String accountNum = jwtUtil.extractAccountNumber(token);
+        return ResponseEntity.ok(Map.of(
+            "username", username,
+            "accountNumber", accountNum,
+            "params", Map.of("param1", param1, "param2", param2)
+        ));
+    }
+
+    @PostMapping("/post-with-body")
+    public ResponseEntity<?> postWithBody(@RequestBody Map<String, String> body, @RequestHeader("Authorization") String token) {
+        String username = jwtUtil.extractUsername(token);
+        String accountNum = jwtUtil.extractAccountNumber(token);
+        return ResponseEntity.ok(Map.of(
+            "username", username,
+            "accountNumber", accountNum,
+            "body", body
+        ));
+    }
+
+    @PutMapping("/put-with-path/{id}")
+    public ResponseEntity<?> putWithPath(@PathVariable String id, @RequestBody Map<String, String> body, @RequestHeader("Authorization") String token) {
+        String username = jwtUtil.extractUsername(token);
+        String accountNum = jwtUtil.extractAccountNumber(token);
+        return ResponseEntity.ok(Map.of(
+            "username", username,
+            "accountNumber", accountNum,
+            "id", id,
+            "body", body
+        ));
+    }
+}
+```
+
+---
+
+### Curl Commands
+
+| HTTP Method | Command                                                                                                    |
+|-------------|------------------------------------------------------------------------------------------------------------|
+| GET         | `curl -X GET "http://localhost:8080/api/get-with-params?param1=value1&param2=value2" -H "Authorization: Bearer <token>"` |
+| POST        | `curl -X POST "http://localhost:8080/api/post-with-body" -H "Content-Type: application/json" -H "Authorization: Bearer <token>" -d '{"key":"value"}'` |
+| PUT         | `curl -X PUT "http://localhost:8080/api/put-with-path/101" -H "Content-Type: application/json" -H "Authorization: Bearer <token>" -d '{"updateField":"newValue"}'` |
+
+---
+
+
+

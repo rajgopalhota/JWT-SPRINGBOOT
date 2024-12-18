@@ -1,6 +1,6 @@
-package com.jwt.demo.config;
+package com.jwt.auth.config;
 
-import com.jwt.demo.utils.JwtFilter;
+import com.jwt.auth.utils.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
