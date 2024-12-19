@@ -127,12 +127,6 @@ The `/protected-route` endpoint requires a valid JWT token to access. If the tok
 - The `SecurityContext` stores the authenticated user's details. If you're troubleshooting authentication issues, logging the details in the filter will help trace issues like token validation or missing tokens.
 
 ---
-## Conclusion
-
-This project provides a simple implementation of JWT-based authentication in a Spring Boot application. The key components include a custom JWT authentication filter, security configuration, and the ability to access protected routes with a valid token. This architecture can be easily extended to handle additional security features such as role-based access control and token refresh mechanisms.
-
----
-
 
 ## Day 2: Enhancements and API Design
 
@@ -224,5 +218,84 @@ public class ApiController {
 
 ---
 
+### Day 03: Notes and Updates
 
+#### Key Changes
 
+1. **Dependency Updates**:
+    - Removed unnecessary dependencies (`jaxb-api`) since they are no longer required for this project.
+    - Updated key dependencies to the latest versions:
+        - **Spring Boot Starter Security**: Provides enhanced security features.
+        - **Spring Boot Starter Web**: For RESTful APIs.
+        - **jjwt-api**: Updated to the latest version for better support and features.
+
+   Updated `pom.xml` dependencies:
+   ```xml
+   <dependencies>
+       <dependency>
+           <groupId>org.springframework.boot</groupId>
+           <artifactId>spring-boot-starter-security</artifactId>
+       </dependency>
+       <dependency>
+           <groupId>org.springframework.boot</groupId>
+           <artifactId>spring-boot-starter-web</artifactId>
+       </dependency>
+       <dependency>
+           <groupId>io.jsonwebtoken</groupId>
+           <artifactId>jjwt-api</artifactId>
+           <version>0.11.5</version>
+       </dependency>
+       <dependency>
+           <groupId>io.jsonwebtoken</groupId>
+           <artifactId>jjwt-impl</artifactId>
+           <version>0.11.5</version>
+           <scope>runtime</scope>
+       </dependency>
+       <dependency>
+           <groupId>io.jsonwebtoken</groupId>
+           <artifactId>jjwt-jackson</artifactId>
+           <version>0.11.5</version>
+           <scope>runtime</scope>
+       </dependency>
+   </dependencies>
+   ```
+
+2. **Code Updates**:
+    - Updated the `JwtUtil` class to address deprecated methods from the older `jjwt` library.
+    - Replaced old method calls with newer ones that align with the updated `jjwt` library.
+
+#### Highlights of `JwtUtil` Changes
+
+1. **Key Enhancements**:
+    - Introduced the use of `Jwts.builder()` and `Jwts.parser()` with the newer APIs.
+    - Updated the signing and verification methods using `SecretKey` and `Keys` utility from `jjwt`.
+
+2. **Updated Methods**:
+    - **`generateToken`**: Generates JWT tokens with additional claims, ensuring compatibility with the latest library features.
+    - **`validateToken`**: Handles validation for token expiration, malformed tokens, and signature verification.
+    - **`extractUsername` and `extractAccountNumber`**: Simplified extraction using new claim resolution patterns.
+    - **`getSignInKey`**: Generates the signing key securely using `Decoders.BASE64` and `Keys.hmacShaKeyFor`.
+
+3. **Enhanced Validation**:
+    - Added better error handling for scenarios such as expired tokens, malformed tokens, and unsupported formats.
+
+#### Notes for Future Enhancements
+
+1. **Environment Variables for Secrets**:
+    - Move the `SECRET_KEY` to an environment variable or a secure vault for production use.
+
+2. **Role-Based Authorization**:
+    - Extend `JwtUtil` and the security filter to support role-based claims for user access control.
+
+3. **Token Refresh Mechanism**:
+    - Add an endpoint for refreshing tokens when nearing expiration.
+
+4. **Logging**:
+    - Integrate structured logging for debugging token-related issues in production.
+
+---
+## Conclusion
+
+This project provides a simple implementation of JWT-based authentication in a Spring Boot application. The key components include a custom JWT authentication filter, security configuration, and the ability to access protected routes with a valid token. This architecture can be easily extended to handle additional security features such as role-based access control and token refresh mechanisms.
+
+---
